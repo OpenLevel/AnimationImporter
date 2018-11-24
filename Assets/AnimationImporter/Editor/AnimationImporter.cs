@@ -279,18 +279,22 @@ namespace AnimationImporter
 			job.SetProgress(0);
 
 			IAnimationImporterPlugin importer = _importerPlugins[GetExtension(job.fileName)];
-			ImportedAnimationSheet animationSheet = importer.Import(job, sharedData);
+
+            if (sharedData.namingScheme == NamingScheme.ItsName)
+                AssetDatabase.RenameAsset(job.directoryPathForSprites + "\\Sprites.png", job.name);
+
+            ImportedAnimationSheet animationSheet = importer.Import(job, sharedData);
 
 			job.SetProgress(0.3f);
 
 			if (animationSheet != null)
 			{
-				animationSheet.assetDirectory = job.assetDirectory;
+                animationSheet.assetDirectory = job.assetDirectory;
 				animationSheet.name = job.name;
 
 				animationSheet.ApplySpriteNamingScheme(sharedData.spriteNamingScheme);
 
-				CreateSprites(animationSheet, job);
+                CreateSprites(animationSheet, job);
 
 				job.SetProgress(0.6f);
 
@@ -311,20 +315,7 @@ namespace AnimationImporter
 				}
 
                 if (sharedData.namingScheme == NamingScheme.ItsName)
-                {
-                    var oldImageAssetFileName = Path.Combine(job.directoryPathForSprites, "Sprites" + Path.GetExtension(job.imageAssetFilename));
-                    var oldAsset = AssetDatabase.LoadMainAssetAtPath(oldImageAssetFileName);
-
-                    if (oldAsset == null)
-                    {
-                        AssetDatabase.RenameAsset(job.imageAssetFilename, "Sprites");
-                    }
-                    else
-                    {
-                        EditorUtility.CopySerialized(AssetDatabase.LoadMainAssetAtPath(job.imageAssetFilename), oldAsset);
-                        AssetDatabase.DeleteAsset(job.imageAssetFilename);
-                    }
-                }
+                    AssetDatabase.RenameAsset(job.imageAssetFilename, "Sprites");
             }
 
 			return animationSheet;
@@ -482,8 +473,8 @@ namespace AnimationImporter
 
 			TextureImporter importer = AssetImporter.GetAtPath(imageAssetFile) as TextureImporter;
 
-			// apply texture import settings if there are no previous ones
-			if (!animationSheet.hasPreviousTextureImportSettings)
+            // apply texture import settings if there are no previous ones
+            if (!animationSheet.hasPreviousTextureImportSettings)
 			{
                 importer.textureType = TextureImporterType.Sprite;
 				importer.spritePixelsPerUnit = sharedData.spritePixelsPerUnit;
