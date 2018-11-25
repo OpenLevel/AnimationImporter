@@ -210,10 +210,24 @@ namespace AnimationImporter
 			Import(jobs.ToArray());
 		}
 
-		/// <summary>
-		/// can be used by custom import pipeline
-		/// </summary>
-		public ImportedAnimationSheet ImportSpritesAndAnimationSheet(
+        public void ImportAsset(string assetPath, ImportAnimatorController importAnimatorController = ImportAnimatorController.None)
+        {
+            if (!IsValidAsset(assetPath))
+            {
+                Debug.Log(assetPath);
+                return;
+            }
+
+            AnimationImportJob job = CreateAnimationImportJob(assetPath);
+            job.importAnimatorController = importAnimatorController;
+
+            Import(job);
+        }
+
+        /// <summary>
+        /// can be used by custom import pipeline
+        /// </summary>
+        public ImportedAnimationSheet ImportSpritesAndAnimationSheet(
 			string assetPath,
 			ChangeImportJob changeImportJob = null,
 			string additionalCommandLineArguments = null
@@ -242,7 +256,7 @@ namespace AnimationImporter
 			return ImportJob(job);
 		}
 
-		private void Import(AnimationImportJob[] jobs)
+		private void Import(params AnimationImportJob[] jobs)
 		{
 			if (jobs == null || jobs.Length == 0)
 			{
